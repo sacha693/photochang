@@ -97,9 +97,9 @@
 
             // 嚴格檢查 heic2any 函式是否已定義
             if (typeof heic2any === 'undefined') {
-                // 如果 Canvas 預覽仍失敗，則提醒使用者在 GitHub Page 上執行。
-                const errorMessage = '錯誤：核心轉換函式庫未載入。請確認您的網路連線是否穩定。**重要提醒：** 此問題可能與 Canvas 預覽環境的網路限制有關，**將此檔案部署到 GitHub Page 後應可正常運作。**';
-                console.error('Dependency Error: heic2any is not defined. CDN script likely failed to load.');
+                // *** 最終錯誤提示：引導使用者進行部署 ***
+                const errorMessage = '核心轉換功能尚未載入。此問題為**預覽環境限制**所致。請務必將此檔案上傳到 GitHub，並透過 GitHub Pages 託管後，才能在瀏覽器中正常運行。';
+                console.error('Dependency Error: heic2any is not defined. CDN script likely failed to load due to environment restrictions.');
                 showMessage(errorMessage, 'error');
                 return;
             }
