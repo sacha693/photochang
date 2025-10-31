@@ -6,8 +6,6 @@
     <title>HEIC 轉 JPG 轉換器</title>
     <!-- 載入 Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 載入 heic2any 函式庫，用於在瀏覽器端解碼 HEIC 檔案 -->
-    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.15/dist/heic2any.min.js"></script>
     <style>
         /* 使用 Inter 字體以獲得乾淨現代的外觀 */
         body {
@@ -59,6 +57,8 @@
         </footer>
     </div>
 
+    <!-- 載入 heic2any 函式庫，用於在瀏覽器端解碼 HEIC 檔案 (已從 head 移動至此) -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.15/dist/heic2any.min.js"></script>
     <script>
         // 設定全域變數
         const fileInput = document.getElementById('file-upload-input');
