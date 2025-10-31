@@ -57,8 +57,8 @@
         </footer>
     </div>
 
-    <!-- 載入 heic2any 函式庫，現在使用 unpkg CDN 服務 -->
-    <script src="https://unpkg.com/heic2any@0.0.15/dist/heic2any.min.js"></script>
+    <!-- 載入 heic2any 函式庫，現在使用 jsdelivr CDN (確保穩定性) -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.15/dist/heic2any.min.js"></script>
     <script>
         // 設定全域變數
         const fileInput = document.getElementById('file-upload-input');
@@ -97,7 +97,8 @@
 
             // 嚴格檢查 heic2any 函式是否已定義
             if (typeof heic2any === 'undefined') {
-                const errorMessage = '錯誤：核心轉換函式庫未載入。這可能是網路連線問題，請檢查網路或嘗試重新整理頁面。';
+                // 如果 Canvas 預覽仍失敗，則提醒使用者在 GitHub Page 上執行。
+                const errorMessage = '錯誤：核心轉換函式庫未載入。請確認您的網路連線是否穩定。**重要提醒：** 此問題可能與 Canvas 預覽環境的網路限制有關，**將此檔案部署到 GitHub Page 後應可正常運作。**';
                 console.error('Dependency Error: heic2any is not defined. CDN script likely failed to load.');
                 showMessage(errorMessage, 'error');
                 return;
