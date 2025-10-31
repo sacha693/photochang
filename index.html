@@ -97,9 +97,9 @@
 
             // 嚴格檢查 heic2any 函式是否已定義
             if (typeof heic2any === 'undefined') {
-                // *** 最終錯誤提示：引導使用者進行部署 ***
-                const errorMessage = '核心轉換功能尚未載入。此問題為**預覽環境限制**所致。請務必將此檔案上傳到 GitHub，並透過 GitHub Pages 託管後，才能在瀏覽器中正常運行。';
-                console.error('Dependency Error: heic2any is not defined. CDN script likely failed to load due to environment restrictions.');
+                // 移除環境限制的冗長解釋，改用簡單的網路錯誤提示
+                const errorMessage = '核心轉換功能尚未載入。請檢查您的網路連線，或嘗試重新整理頁面。';
+                console.error('Dependency Error: heic2any is not defined. CDN script likely failed to load.');
                 showMessage(errorMessage, 'error');
                 return;
             }
