@@ -57,7 +57,7 @@
         </footer>
     </div>
 
-    <!-- 載入 heic2any 函式庫，用於在瀏覽器端解碼 HEIC 檔案 (已從 head 移動至此) -->
+    <!-- 載入 heic2any 函式庫，用於在瀏覽器端解碼 HEIC 檔案 -->
     <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.15/dist/heic2any.min.js"></script>
     <script>
         // 設定全域變數
@@ -94,6 +94,14 @@
 
             // 2. 顯示載入狀態
             showMessage(`正在轉換檔案 "${file.name}"... 請稍候，轉換可能需要幾秒鐘。`, 'info');
+
+            // 嚴格檢查 heic2any 函式是否已定義
+            if (typeof heic2any === 'undefined') {
+                const errorMessage = '錯誤：核心轉換函式庫未載入。這可能是網路連線問題，請檢查網路或嘗試重新整理頁面。';
+                console.error('Dependency Error: heic2any is not defined. CDN script likely failed to load.');
+                showMessage(errorMessage, 'error');
+                return;
+            }
 
             try {
                 // 3. 呼叫 heic2any 函式庫進行轉換
