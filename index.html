@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEIC 轉 JPG 轉換器</title>
+    <!-- 載入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 heic2any 函式庫，用於在瀏覽器端解碼 HEIC 檔案 -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.15/dist/heic2any.min.js"></script>
+    <style>
+        /* 使用 Inter 字體以獲得乾淨現代的外觀 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        /* 隱藏原生檔案輸入欄位 */
+        #file-upload-input {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-xl bg-white shadow-2xl rounded-xl p-8 transition-all duration-300 transform hover:scale-[1.01]">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-blue-600 mb-2">HEIC 轉 JPG 神器</h1>
+            <p class="text-gray-500">只需輕鬆點擊，即可將您的 iPhone/iPad 照片轉換為通用的 JPG 格式。</p>
+        </header>
+
+        <!-- 檔案上傳區域 -->
+        <label for="file-upload-input" id="drop-zone"
+            class="block w-full border-2 border-dashed border-gray-300 rounded-lg p-10 cursor-pointer text-center transition duration-300 ease-in-out hover:border-blue-500 hover:bg-blue-50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v8" />
+            </svg>
+            <p class="mt-4 text-sm font-semibold text-gray-700">點擊選取檔案 或 拖曳檔案到此</p>
+            <p class="text-xs text-gray-500">(僅支援 .heic 或 .heif 檔案)</p>
+        </label>
+        <input type="file" id="file-upload-input" accept=".heic,.heif">
+
+        <!-- 狀態與結果顯示區域 -->
+        <div id="status-container" class="mt-6">
+            <div id="message-box" class="hidden p-4 rounded-lg text-sm transition-all duration-300" role="alert"></div>
+
+            <div id="download-area" class="mt-4 hidden text-center">
+                <a id="download-link" href="#" download="" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    下載已轉換的 JPG 檔案
+                </a>
+            </div>
+        </div>
+
+        <!-- 註腳 -->
+        <footer class="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400 text-center">
+            <p>轉換過程完全在您的瀏覽器中完成，不會將您的檔案上傳到任何伺服器，請安心使用。</p>
+        </footer>
+    </div>
+
+    <script>
+        // 設定全域變數
+        const fileInput = document.getElementById('file-upload-input');
+        const dropZone = document.getElementById('drop-zone');
+        const messageBox = document.getElementById('message-box');
+        const downloadArea = document.getElementById('download-area');
+        const downloadLink = document.getElementById('download-link');
+
+        // 顯示訊息函式
+        function showMessage(text, type = 'info') {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-blue-100', 'text-blue-700', 'bg-green-100', 'text-green-700');
+            downloadArea.classList.add('hidden');
+
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'text-green-700');
+            } else { // info / loading
+                messageBox.classList.add('bg-blue-100', 'text-blue-700');
+            }
+        }
+
+        // 處理檔案的核心邏輯
+        async function handleFile(file) {
+            if (!file) return;
+
+            // 1. 檢查檔案類型
+            if (!file.name.toLowerCase().endsWith('.heic') && !file.name.toLowerCase().endsWith('.heif')) {
+                showMessage('錯誤：請選擇一個有效的 HEIC 或 HEIF 檔案。', 'error');
+                return;
+            }
+
+            // 2. 顯示載入狀態
+            showMessage(`正在轉換檔案 "${file.name}"... 請稍候，轉換可能需要幾秒鐘。`, 'info');
+
+            try {
+                // 3. 呼叫 heic2any 函式庫進行轉換
+                const jpgBlob = await heic2any({
+                    blob: file,
+                    toType: "image/jpeg", // 輸出格式設為 JPEG
+                    quality: 0.8          // 設置 JPEG 品質 (0.0 到 1.0)
+                });
+
+                // 4. 建立下載連結
+                const url = URL.createObjectURL(jpgBlob);
+                const originalName = file.name.split('.').slice(0, -1).join('.');
+                const newFileName = `${originalName}.jpg`;
+
+                downloadLink.href = url;
+                downloadLink.download = newFileName;
+                
+                // 5. 顯示成功訊息與下載按鈕
+                showMessage(`轉換成功！檔案名稱：${newFileName}`, 'success');
+                downloadArea.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Conversion Error:', error);
+                showMessage(`轉換過程中發生錯誤，可能檔案損壞或格式不正確: ${error.message}`, 'error');
+            }
+        }
+
+        // --- 事件監聽器 ---
+
+        // 檔案選取事件
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            handleFile(file);
+        });
+
+        // 拖曳區的事件 (Drag & Drop)
+        // 阻止預設行為 (必須)
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false); // 防止拖曳到 body 導致開啟檔案
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // 視覺回饋: 進入拖曳區
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.add('border-blue-600', 'bg-blue-100');
+            }, false);
+        });
+
+        // 視覺回饋: 離開拖曳區
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => {
+                dropZone.classList.remove('border-blue-600', 'bg-blue-100');
+            }, false);
+        });
+
+        // 檔案拖放事件
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            } else {
+                showMessage('請確保您拖曳的是 HEIC 檔案。', 'error');
+            }
+        }, false);
+
+        // 初始提示
+        window.onload = () => {
+            showMessage("準備好了！請選取或拖曳一個 HEIC/HEIF 檔案。", 'info');
+        }
+
+    </script>
+</body>
+</html>
